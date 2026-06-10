@@ -92,7 +92,9 @@ export default function MatchScreen() {
 
       <View style={styles.steppers}>
         <ScoreStepper label={match.home_team} flag={match.home_flag} value={home} onChange={setHome} disabled={locked} />
-        <Text style={styles.dash}>–</Text>
+        <View style={styles.sep}>
+          <Text style={styles.dash}>–</Text>
+        </View>
         <ScoreStepper label={match.away_team} flag={match.away_flag} value={away} onChange={setAway} disabled={locked} />
       </View>
 
@@ -129,8 +131,11 @@ const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: theme.color.bg, padding: 24, gap: 24 },
   center: { alignItems: 'center', justifyContent: 'center' },
   stage: { color: theme.color.muted, fontSize: theme.font.body, fontWeight: '600', textAlign: 'center' },
-  steppers: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
-  dash: { color: theme.color.muted, fontSize: 40, fontWeight: '800', paddingHorizontal: 4, marginTop: 28 },
+  // Align to the bottom so the separator lines up with the +/- control rows (team
+  // labels sit above them); fixed-width column keeps it from overlapping the buttons.
+  steppers: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 12 },
+  sep: { width: 18, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 6 },
+  dash: { color: theme.color.muted, fontSize: 28, fontWeight: '800', textAlign: 'center', alignSelf: 'center' },
   statusBox: { alignItems: 'center', gap: 4 },
   statusMain: { color: theme.color.text, fontSize: theme.font.h3, fontWeight: '700' },
   statusSub: { color: theme.color.muted, fontSize: theme.font.body },
