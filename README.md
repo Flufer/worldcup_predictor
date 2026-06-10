@@ -1,50 +1,65 @@
-# Welcome to your Expo app 👋
+# ⚽️ WorldCup Predictor
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Predict FIFA World Cup 2026 scores, create private leagues with friends, climb a leaderboard.
+Android-first MVP — **Expo SDK 54** (React Native + TypeScript) + **Supabase**. No AI, no payments, no ads.
 
-## Get started
+> Team docs in [`docs/`](./docs): [PRD](./docs/PRD.md) · [Architecture](./docs/ARCHITECTURE.md) ·
+> [Database](./docs/DATABASE.md) · [Screens](./docs/SCREENS.md) · [48h Plan](./docs/PLAN_48H.md) ·
+> [Growth](./docs/GROWTH.md)
 
-1. Install dependencies
+## Stack
 
-   ```bash
-   npm install
+- **Expo SDK 54 + expo-router 6 + TypeScript** (file-based navigation).
+- **Supabase** — Postgres + Auth (email/password). Security is enforced in the database (Row Level
+  Security + `security definer` RPCs); the app is a thin client and trusts nothing.
+
+## Setup (≈10 min)
+
+### 1. Supabase
+1. Create a project at [supabase.com](https://supabase.com) (free tier).
+2. SQL editor → run the migrations **in order**:
    ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
+   supabase/migrations/20260610090001_auth.sql
+   supabase/migrations/20260610090002_leagues.sql
+   supabase/migrations/20260610090003_matches_predictions.sql
+   supabase/migrations/20260610090004_scoring.sql
+   supabase/migrations/20260610090005_leaderboard.sql
    ```
+   (Or, with the Supabase CLI: `supabase db push`.)
+3. SQL editor → run [`supabase/seed.sql`](./supabase/seed.sql) for sample matches.
+4. **Auth → Providers → Email**: for a friends test, turn **"Confirm email" OFF** so signups are instant.
+5. Settings → API → copy the **Project URL** and **anon public key**.
+6. (Admin) the `set_result` allowlist in `0004_scoring.sql` contains `mirdenisa251@gmail.com` — change it
+   if you sign in with a different email.
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### 2. App
 ```bash
-npm run reset-project
+cp .env.example .env      # then paste your URL + anon key
+npm install
+npm run android           # or: npx expo start  (press 'a' for Android / scan with Expo Go SDK 54)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Scoring
+| Outcome | Points |
+|---|---|
+| Exact score | 5 |
+| Correct result + goal difference | 3 |
+| Correct result | 2 |
+| Wrong | 0 |
 
-## Learn more
+One prediction per user per match; it counts in every league you're in. Points are computed in the DB by
+a trigger the moment a result is entered — never on the client.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project layout
+```
+app/         expo-router screens (auth, leagues, create, join, league/[id], match/[id])
+components/  Button, Input, ScoreStepper, MatchRow, EmptyState, Segmented
+lib/         supabase client, auth context, types, theme, scoring/format helpers
+supabase/    migrations/ (ordered DDL) + seed.sql
+docs/        PRD, architecture, database, screens, 48h plan, growth
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Notes
+- Match results are entered via the `set_result()` RPC (or directly in the table) — no live-score API in the MVP.
+- Predictions lock at kickoff in the **database** (RLS), not just the UI.
+- Times stored as UTC, rendered in the device's local time.
