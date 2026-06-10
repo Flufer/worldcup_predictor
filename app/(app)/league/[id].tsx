@@ -12,6 +12,7 @@ import { Segmented } from '../../../components/Segmented';
 import { EmptyState } from '../../../components/EmptyState';
 import { StageFilter, ALL_STAGES } from '../../../components/StageFilter';
 import { TournamentView } from '../../../components/TournamentView';
+import { useMatchesRealtime } from '../../../lib/useMatchesRealtime';
 
 type BoardTab = 'All' | 'Groups' | 'Finals';
 const KNOCKOUT_CODES = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
@@ -101,6 +102,11 @@ export default function LeagueScreen() {
       load();
     }, [load])
   );
+
+  // v1.1: live updates — when any result lands, re-run the existing load() (matches +
+  // predictions + leaderboard). Debounced inside the hook. Focus-refetch above is the
+  // fallback for backgrounded reconnects.
+  useMatchesRealtime(load);
 
   function onBoardTabChange(next: string) {
     const t = next as BoardTab;
