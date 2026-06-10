@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { theme } from '../../lib/theme';
 import { League } from '../../lib/types';
+import { useIsAdmin } from '../../lib/useIsAdmin';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 
@@ -14,6 +15,7 @@ type Row = League & { member_count: number };
 export default function Leagues() {
   const { session, signOut } = useAuth();
   const router = useRouter();
+  const isAdmin = useIsAdmin();
   const insets = useSafeAreaInsets();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,9 +62,18 @@ export default function Leagues() {
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={false} onRefresh={load} tintColor={theme.color.primary} />}
         ListHeaderComponent={
-          <Pressable onPress={signOut} style={styles.signout}>
-            <Text style={styles.signoutText}>Sign out</Text>
-          </Pressable>
+          <View style={styles.headerRow}>
+            {isAdmin ? (
+              <Pressable onPress={() => router.push('/(app)/admin')} hitSlop={8}>
+                <Text style={styles.adminText}>⚙︎ Admin</Text>
+              </Pressable>
+            ) : (
+              <View />
+            )}
+            <Pressable onPress={signOut} style={styles.signout}>
+              <Text style={styles.signoutText}>Sign out</Text>
+            </Pressable>
+          </View>
         }
         ListEmptyComponent={
           loading ? null : (
@@ -96,7 +107,9 @@ export default function Leagues() {
 const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: theme.color.bg },
   list: { padding: 16, gap: 12 },
-  signout: { alignSelf: 'flex-end', paddingVertical: 6 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  adminText: { color: theme.color.accent, fontSize: theme.font.small, fontWeight: '700', paddingVertical: 6 },
+  signout: { paddingVertical: 6 },
   signoutText: { color: theme.color.muted, fontSize: theme.font.small, fontWeight: '600' },
   card: {
     flexDirection: 'row',
