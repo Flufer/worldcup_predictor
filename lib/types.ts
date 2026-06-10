@@ -16,9 +16,15 @@ export type League = {
 
 export type MatchStatus = 'scheduled' | 'finished';
 
+// Machine stage codes (mirror matches.stage_code). 'group' covers all 12 groups.
+export type StageCode = 'group' | 'r32' | 'r16' | 'qf' | 'sf' | 'third' | 'final';
+
 export type Match = {
   id: string;
-  stage: string;
+  stage: string; // display label, e.g. "Group A" / "Round of 16"
+  stage_code: StageCode;
+  stage_order: number; // 1..7 for sorting
+  group_label: string | null; // 'A'..'L' for group matches, null for knockout
   home_team: string;
   away_team: string;
   home_flag: string;
@@ -27,6 +33,14 @@ export type Match = {
   home_score: number | null;
   away_score: number | null;
   status: MatchStatus;
+};
+
+export type Team = {
+  id: string;
+  name: string;
+  flag: string;
+  group_label: string | null; // 'A'..'L'
+  fifa_code?: string | null;
 };
 
 export type Prediction = {

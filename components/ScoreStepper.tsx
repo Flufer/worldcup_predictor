@@ -46,10 +46,10 @@ export function ScoreStepper({
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 12, flex: 1 },
   team: { color: theme.color.text, fontSize: theme.font.h3, fontWeight: '700', textAlign: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   btn: {
-    width: 52,
-    height: 52,
+    width: 44,
+    height: 44,
     borderRadius: theme.radius.md,
     backgroundColor: theme.color.surfaceAlt,
     borderWidth: 1,
@@ -59,6 +59,6 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.4 },
   pressed: { opacity: 0.7 },
-  btnText: { color: theme.color.text, fontSize: 26, fontWeight: '700' },
-  value: { color: theme.color.accent, fontSize: 40, fontWeight: '800', minWidth: 48, textAlign: 'center' },
+  btnText: { color: theme.color.text, fontSize: 24, fontWeight: '700' },
+  value: { color: theme.color.accent, fontSize: 34, fontWeight: '800', minWidth: 36, textAlign: 'center' },
 });
