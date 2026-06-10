@@ -1,4 +1,23 @@
-import { Match } from './types';
+import { Match, StageCode } from './types';
+
+// Tournament stages in order. `code` mirrors matches.stage_code; `name` is the short
+// chip label. Used by the stage filter and the bracket sections.
+export const STAGES: { code: StageCode; name: string }[] = [
+  { code: 'group', name: 'Groups' },
+  { code: 'r32', name: 'R32' },
+  { code: 'r16', name: 'R16' },
+  { code: 'qf', name: 'QF' },
+  { code: 'sf', name: 'SF' },
+  { code: 'third', name: '3rd' },
+  { code: 'final', name: 'Final' },
+];
+
+// Knockout stages only (group stage excluded), for the bracket view.
+export const KNOCKOUT_STAGES = STAGES.filter((s) => s.code !== 'group');
+
+export function stageName(code: StageCode): string {
+  return STAGES.find((s) => s.code === code)?.name ?? code;
+}
 
 export function isLocked(match: Match): boolean {
   return new Date(match.kickoff).getTime() <= Date.now();
