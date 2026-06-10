@@ -46,12 +46,25 @@ profiles ──────────┐
 | joined_at | timestamptz | |
 | | | **PK (league_id, user_id)** — can't join twice |
 
+### `teams` *(added in migration 0006)*
+| column | type | notes |
+|---|---|---|
+| id | uuid PK | |
+| name | text | |
+| flag | text | emoji flag |
+| group_label | text null | 'A'..'L' (group-stage teams) |
+| fifa_code | text null | optional |
+| | | public read (RLS), no client writes — powers the Groups view |
+
 ### `matches`
 | column | type | notes |
 |---|---|---|
 | id | uuid PK | |
-| stage | text | 'Group A', 'Round of 16'… |
-| home_team / away_team | text | |
+| stage | text | display label: 'Group A', 'Round of 16'… |
+| stage_code | text | *(0006)* machine stage: group\|r32\|r16\|qf\|sf\|third\|final |
+| stage_order | int | *(0006)* 1..7, for sorting/sections |
+| group_label | text null | *(0006)* 'A'..'L' for group matches, null for knockout |
+| home_team / away_team | text | knockout rows use placeholders ('1A', 'W R32-1') until set |
 | home_flag / away_flag | text | emoji flag (no asset pipeline) |
 | kickoff | timestamptz | UTC; **the lock boundary** |
 | home_score / away_score | int null | null = not played yet |
@@ -75,6 +88,7 @@ profiles ──────────┐
 | profiles | everyone (need usernames) | only your own row |
 | leagues | members only (via membership) | insert: authed; owner set to you |
 | league_members | rows of leagues you belong to | insert your own membership only |
+| teams | everyone (public) | **none** (admin via service role) |
 | matches | everyone (public schedule) | **none** (admin via service role) |
 | predictions | **only your own** | only your own **and** `now() < kickoff` |
 
@@ -84,8 +98,10 @@ Rivals' picks are never selectable. Standings come *only* from the aggregating R
 
 - **`join_league(code text)`** → finds league by `invite_code`, inserts caller into `league_members`,
   returns the league row. Lets users join without `SELECT` rights on other leagues.
-- **`get_leaderboard(p_league_id uuid)`** → returns `username, total_points, exact_count, played` for
-  each member, ordered. Aggregates `predictions.points`; never leaks individual picks.
+- **`get_leaderboard(p_league_id uuid, p_stage text default null)`** → returns `username, total_points,
+  exact_count, played` for each member, ordered. Aggregates `predictions.points`; never leaks individual
+  picks. *(0006)* optional `p_stage` narrows the sums to one `matches.stage_code` (via `FILTER`) without
+  dropping members who scored nothing in that stage; omitting it (1-arg call) keeps the full-tournament total.
 - **`set_result(p_match_id uuid, p_home int, p_away int)`** → admin-only (checks a hardcoded admin
   list / service role); sets score + status, fires scoring.
 
