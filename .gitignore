@@ -45,3 +45,6 @@ app-example
 
 # Claude Code local files
 .claude/
+
+# Editor / IDE
+.vscode/
