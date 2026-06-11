@@ -17,7 +17,6 @@ export function useMatchesRealtime(matchId?: string): number {
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    console.log('[realtime] subscribe →', matchId ? `matches:${matchId}` : 'matches');
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const channel = supabase
@@ -30,17 +29,12 @@ export function useMatchesRealtime(matchId?: string): number {
           table: 'matches',
           ...(matchId ? { filter: `id=eq.${matchId}` } : {}),
         },
-        (payload) => {
-          const rowId = (payload.new as any)?.id ?? (payload.old as any)?.id;
-          console.log('[realtime] event received:', payload.eventType, rowId);
+        () => {
           if (timer) clearTimeout(timer);
-          timer = setTimeout(() => {
-            console.log('[realtime] reload trigger (version bump)');
-            setVersion((v) => v + 1);
-          }, 250); // coalesce bursts of results into one refetch
+          timer = setTimeout(() => setVersion((v) => v + 1), 250); // coalesce bursts
         }
       )
-      .subscribe((status) => console.log('[realtime] channel status:', status));
+      .subscribe();
 
     return () => {
       if (timer) clearTimeout(timer);

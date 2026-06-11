@@ -108,10 +108,7 @@ export default function LeagueScreen() {
   // closure. Focus-refetch above is the fallback for backgrounded reconnects.
   const rtVersion = useMatchesRealtime();
   useEffect(() => {
-    if (rtVersion) {
-      console.log('[realtime] league reload via version', rtVersion);
-      load();
-    }
+    if (rtVersion) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rtVersion]);
 
