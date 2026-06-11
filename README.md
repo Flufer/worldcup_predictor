@@ -59,7 +59,15 @@ supabase/    migrations/ (ordered DDL) + seed.sql
 docs/        PRD, architecture, database, screens, 48h plan, growth
 ```
 
+## Live updates & admin (v1.1)
+- Apply migration `…090007_admin_realtime.sql`, then make yourself an admin:
+  `update public.profiles set is_admin = true where username = 'YOUR_USERNAME';`
+- An **⚙︎ Admin** link appears on the Leagues screen for admins → enter/correct results from the phone.
+- Results flow only through the `set_result()` RPC (admin-gated). The scoring trigger recomputes points
+  and **Supabase Realtime** pushes the change to every client — leaderboard and matches update with no
+  manual refresh. Confirm `matches` is enabled under Database → Replication (publication `supabase_realtime`).
+
 ## Notes
-- Match results are entered via the `set_result()` RPC (or directly in the table) — no live-score API in the MVP.
 - Predictions lock at kickoff in the **database** (RLS), not just the UI.
-- Times stored as UTC, rendered in the device's local time.
+- Times stored as UTC/with offset, rendered in the device's local time.
+- A real football API can later drive `set_result()` via a scheduled Edge Function — no app changes.

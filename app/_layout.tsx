@@ -51,6 +51,7 @@ function RootNavigator() {
       <Stack.Screen name="(app)/join" options={{ title: 'Join League', presentation: 'modal' }} />
       <Stack.Screen name="(app)/league/[id]" options={{ title: 'League' }} />
       <Stack.Screen name="(app)/match/[id]" options={{ title: 'Prediction', presentation: 'modal' }} />
+      <Stack.Screen name="(app)/admin" options={{ title: 'Admin · Results' }} />
     </Stack>
   );
 }

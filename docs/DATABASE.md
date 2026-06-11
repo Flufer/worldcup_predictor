@@ -102,8 +102,8 @@ Rivals' picks are never selectable. Standings come *only* from the aggregating R
   exact_count, played` for each member, ordered. Aggregates `predictions.points`; never leaks individual
   picks. *(0006)* optional `p_stage` narrows the sums to one `matches.stage_code` (via `FILTER`) without
   dropping members who scored nothing in that stage; omitting it (1-arg call) keeps the full-tournament total.
-- **`set_result(p_match_id uuid, p_home int, p_away int)`** → admin-only (checks a hardcoded admin
-  list / service role); sets score + status, fires scoring.
+- **`set_result(p_match_id uuid, p_home int, p_away int)`** → admin-only (checks `profiles.is_admin`,
+  v1.1); sets score + status `finished`, fires scoring + realtime fan-out. The single result-write path.
 
 ## Triggers
 
@@ -111,6 +111,18 @@ Rivals' picks are never selectable. Standings come *only* from the aggregating R
 - **`after update on matches` (when score set)** → `score_predictions()`: for every prediction of that
   match, compute points by the rules in [PRD §4](./PRD.md) and write `predictions.points`. Re-runs if a
   score is corrected, so leaderboards self-heal.
+
+## v1.1 — admin role & realtime *(migration 0007)*
+
+- `profiles.is_admin boolean default false` — server-enforced admin flag. Flip it for an account with
+  `update public.profiles set is_admin = true where username = '…';`.
+- `set_result(uuid,int,int)` now gates on `is_admin` (was a hardcoded email). It remains the **single
+  result-write choke-point** — the in-app admin screen calls it today; a future football-API Edge
+  Function will call the same path. Scoring trigger and RLS are unchanged.
+- `public.matches` is added to the `supabase_realtime` publication so clients subscribe to result
+  changes (`postgres_changes`) and refetch live — no manual refresh. `matches` is public-read, so the
+  per-client realtime authorization check is cheap. Upgrade path at high concurrency: a single Realtime
+  **Broadcast** channel (see plan).
 
 ## Indexes
 

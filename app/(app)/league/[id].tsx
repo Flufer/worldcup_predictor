@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, SectionList, Share, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import { Segmented } from '../../../components/Segmented';
 import { EmptyState } from '../../../components/EmptyState';
 import { StageFilter, ALL_STAGES } from '../../../components/StageFilter';
 import { TournamentView } from '../../../components/TournamentView';
+import { useMatchesRealtime } from '../../../lib/useMatchesRealtime';
 
 type BoardTab = 'All' | 'Groups' | 'Finals';
 const KNOCKOUT_CODES = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
@@ -101,6 +102,18 @@ export default function LeagueScreen() {
       load();
     }, [load])
   );
+
+  // v1.1: live updates — the hook bumps rtVersion on each result change; the effect
+  // re-runs the existing load() (matches + predictions + leaderboard) with the current
+  // closure. Focus-refetch above is the fallback for backgrounded reconnects.
+  const rtVersion = useMatchesRealtime();
+  useEffect(() => {
+    if (rtVersion) {
+      console.log('[realtime] league reload via version', rtVersion);
+      load();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rtVersion]);
 
   function onBoardTabChange(next: string) {
     const t = next as BoardTab;

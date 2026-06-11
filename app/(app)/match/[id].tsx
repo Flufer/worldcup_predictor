@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth } from '../../../lib/auth';
@@ -9,6 +9,7 @@ import { isLocked, kickoffLabel } from '../../../lib/format';
 import { pointsLabel } from '../../../lib/scoring';
 import { Button } from '../../../components/Button';
 import { ScoreStepper } from '../../../components/ScoreStepper';
+import { useMatchesRealtime } from '../../../lib/useMatchesRealtime';
 
 export default function MatchScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -45,6 +46,13 @@ export default function MatchScreen() {
       load();
     }, [load])
   );
+
+  // v1.1: live update this match if its result lands while the screen is open.
+  const rtVersion = useMatchesRealtime(id);
+  useEffect(() => {
+    if (rtVersion) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rtVersion]);
 
   async function save() {
     if (!match || !session) return;
