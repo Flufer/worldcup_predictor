@@ -48,3 +48,13 @@ app-example
 
 # Editor / IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+/build
+/out
+
+# Logs / debug artifacts
+*.log
