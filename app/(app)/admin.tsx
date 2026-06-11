@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,7 +37,11 @@ export default function AdminScreen() {
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
-  useMatchesRealtime(load);
+  const rtVersion = useMatchesRealtime();
+  useEffect(() => {
+    if (rtVersion) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rtVersion]);
 
   function pick(m: Match) {
     setSelected(m);

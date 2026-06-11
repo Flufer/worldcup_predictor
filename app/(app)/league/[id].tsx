@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, SectionList, Share, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -103,10 +103,17 @@ export default function LeagueScreen() {
     }, [load])
   );
 
-  // v1.1: live updates — when any result lands, re-run the existing load() (matches +
-  // predictions + leaderboard). Debounced inside the hook. Focus-refetch above is the
-  // fallback for backgrounded reconnects.
-  useMatchesRealtime(load);
+  // v1.1: live updates — the hook bumps rtVersion on each result change; the effect
+  // re-runs the existing load() (matches + predictions + leaderboard) with the current
+  // closure. Focus-refetch above is the fallback for backgrounded reconnects.
+  const rtVersion = useMatchesRealtime();
+  useEffect(() => {
+    if (rtVersion) {
+      console.log('[realtime] league reload via version', rtVersion);
+      load();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rtVersion]);
 
   function onBoardTabChange(next: string) {
     const t = next as BoardTab;
