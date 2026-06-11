@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "worldcup_predictor",
+    "name": "World Cup Predictor",
     "slug": "worldcup_predictor",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "worldcuppredictor",
@@ -12,6 +12,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.flufer.worldcuppredictor",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
